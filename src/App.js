@@ -12,6 +12,7 @@ function App() {
       clearInterval(timer);
     };
   }, []);
+
   //input task
   const [task, setTask] = useState("");
 
@@ -21,6 +22,9 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  //edit task
+  const [editTask, setEditTask] = useState(null);
+
   //save task
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -29,8 +33,21 @@ function App() {
   //add task
   const addTask = () => {
     if (task.trim() === "") return;
-    setTasks([...tasks, task]);
+    if (editTask !== null) {
+      const updatedTask = [...tasks];
+      updatedTask[editTask] = task.trim();
+      setTasks(updatedTask);
+      setEditTask(null);
+    } else {
+      setTasks([...tasks, task]);
+    }
     setTask("");
+  };
+
+  //edit task
+  const handEdit = (index) => {
+    setTask(tasks[index]);
+    setEditTask(index);
   };
 
   //delete task
@@ -53,13 +70,14 @@ function App() {
         type="text"
         onChange={(e) => setTask(e.target.value)}
       />
-      <button onClick={addTask}>Add</button>
+      <button onClick={addTask}>{editTask !== null ? "Save" : "Add"}</button>
       <button onClick={clearALl}>Clear All</button>
 
       <ul>
         {tasks.map((task, index) => (
           <li key={index}>
             {task}
+            <button onClick={() => handEdit(index)}>Edit</button>
             <button onClick={() => deletaTask(index)}>❌</button>
           </li>
         ))}
